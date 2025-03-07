@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person"> 
+    <email>swomf@proton.me</email>
+    <name>swomf</name>
+  </maintainer>
+  <use>
+    <flag name="applications">Enable plugin to search and run system and user specific desktop entries.</flag>
+    <flag name="symbols">Enable plugin to search unicode symbols</flag>
+    <flag name="rink">Enable plugin for calculator and unit conversion</flag>
+    <flag name="shell">Enable plugin to run shell commands</flag>
+    <flag name="translate">Enable plugin to translate text</flag>
+    <flag name="kidex">Enable plugin for file search provided by kidex</flag>
+    <flag name="randr">Enable plugin for rotate and resize (Hyprland only)</flag>
+    <flag name="stdin">Enable plugin to turn anyrun into a dmenu-like fuzzy selector (typically via --plugins argument)</flag>
+    <flag name="dictionary">Enable plugin to look up definitions for words</flag>
+    <flag name="websearch">Enable plugin to search the web with a user-specified search engine</flag>
+  </use>
+  <upstream>
+    <bugs-to>https://github.com/anyrun-org/anyrun/issues</bugs-to>
+    <remote-id type="github">anyrun-org/anyrun</remote-id>
+  </upstream>
+</pkgmetadata>

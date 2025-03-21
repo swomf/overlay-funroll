@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person"> 
+    <email>swomf@proton.me</email>
+    <name>swomf</name>
+  </maintainer>
+  <use>
+    <flag name="apps">Build the library and cli tool for querying applications</flag>
+    <flag name="auth">Build the library for authentication</flag>
+    <flag name="battery">Build the DBus proxy library for the <pkg>sys-power/upower</pkg> daemon</flag>
+    <flag name="cava">Build the audiovisualization library using <pkg>media-sound/cava</pkg></flag>
+    <flag name="gjs">Enable JavaScript support using <pkg>dev-libs/gjs</pkg></flag>
+    <flag name="greetd">Build the IPC client for <pkg>gui-libs/greetd</pkg></flag>
+    <flag name="gtk3">Build the gtk3 library (standard)</flag>
+    <flag name="gtk4">Build the gtk4 library </flag>
+    <flag name="hyprland">Build the library and cli tool for Hyprland IPC sockets</flag>
+    <flag name="io">Build the main IO library (must be built before any other library, so install astal twice)</flag>
+    <flag name="mpris">Build the library for mpris</flag>
+    <flag name="network">Build the library wrapping NetworkManager</flag>
+    <flag name="notifd">Build the library and cli tool for the notification daemon</flag>
+    <flag name="powerprofiles">Build the library and cli tool to control upowerd powerprofiles</flag>
+    <flag name="river">Build the library and cli tool for <pkg>gui-wm/river</pkg></flag>
+    <flag name="tray">Build the library and cli tool for managing the systemtray</flag>
+    <flag name="wireplumber">Build the <pkg>media-video/wireplumber</pkg> audio control library</flag>
+  </use>
+  <upstream>
+    <bugs-to>https://github.com/Aylur/astal/issues</bugs-to>
+    <remote-id type="github">Aylur/astal</remote-id>
+  </upstream>
+</pkgmetadata>

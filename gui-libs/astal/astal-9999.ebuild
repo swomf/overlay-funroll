@@ -4,7 +4,7 @@
 EAPI=8
 
 LUA_COMPAT=(lua5-{1..4})
-inherit meson git-r3 lua-single
+inherit meson git-r3 lua-single optfeature
 
 DESCRIPTION="Libraries for Aylur's GTK Shell"
 HOMEPAGE="https://github.com/Aylur/astal"
@@ -66,7 +66,7 @@ RDEPEND="
 	river? ( dev-libs/json-glib dev-libs/wayland )
 	mpris? ( dev-libs/json-glib )
 	battery? ( dev-libs/json-glib )
-	tray? ( dev-libs/json-glib x11-libs/gtk+:3 x11-libs/gdk-pixbuf:2 dev-libs/appmenu-glib-translator )
+	tray? ( dev-libs/json-glib x11-libs/gtk+:3 x11-libs/gdk-pixbuf:2 gui-libs/appmenu-glib-translator )
 	notifd? ( dev-libs/json-glib x11-libs/gdk-pixbuf:2 )
 	apps? ( dev-libs/json-glib )
 	auth? ( sys-libs/pam )
@@ -150,4 +150,8 @@ src_install() {
 	if use lua; then
 		LUA_VERSION="$(lua_get_version)" lua_foreach_impl lua_src_install -C "lang/lua"
 	fi
+}
+
+pkg_postinst() {
+	optfeature "support for battery monitor" sys-power/upower
 }

@@ -4,15 +4,17 @@
 EAPI=8
 
 LUA_COMPAT=(lua5-{1..4})
-inherit meson git-r3 lua-single optfeature
+inherit meson lua-single optfeature
 
 DESCRIPTION="Libraries for Aylur's GTK Shell"
 HOMEPAGE="https://github.com/Aylur/astal"
-EGIT_REPO_URI="https://github.com/Aylur/astal.git"
 LICENSE="LGPL-2.1-only"
 SLOT="0"
 
-KEYWORDS="~amd64"
+if [[ ${PV} == 9999 ]]; then
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/Aylur/astal.git"
+fi
 
 IUSE="
 	introspection

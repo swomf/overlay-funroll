@@ -305,7 +305,7 @@ if [[ "${PV}" == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/anyrun-org/${PN}.git"
 else
-	# GIT_COMMIT=""
+	GIT_COMMIT="005333a60c03cf58e0a59b03e76989441276e88b"
 	SRC_URI="https://github.com/anyrun-org/${PN}/archive/${GIT_COMMIT}.tar.gz -> ${P}.tar.gz"
 	S="${WORKDIR}/${PN}-${GIT_COMMIT}"
 	KEYWORDS="~amd64"
@@ -323,9 +323,6 @@ LICENSE="
 	|| ( Apache-2.0 Boost-1.0 )
 "
 SLOT="0"
-# TODO: Why is this needed? Removing this in theory shouldn't
-#       make a -9999-version ebuild keyworded as unstable, but it does.
-KEYWORDS=""
 # default IUSE matches upstream defaults, i.e. the
 # plugins the example "/etc/anyrun/config.ron" loads.
 IUSE="+applications dictionary kidex randr rink +shell stdin +symbols +translate websearch"

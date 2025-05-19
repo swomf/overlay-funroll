@@ -332,16 +332,18 @@ RDEPEND="
 	dev-libs/glib:2
 "
 
+ANYRUN_PLUGINS=(
+	applications dictionary kidex randr rink
+	shell stdin symbols translate websearch
+)
+
 src_unpack() {
 	git-r3_src_unpack
 	cargo_live_src_unpack
 }
 
 src_compile() {
-	local plugins=(
-		applications dictionary kidex randr rink shell stdin symbols translate websearch
-	)
-	for plug in "${plugins[@]}"; do
+	for plug in "${ANYRUN_PLUGINS[@]}"; do
 		if use "$plug"; then
 			pushd plugins/"$plug" &>/dev/null || die
 			cargo_src_compile
@@ -363,6 +365,16 @@ src_install() {
 	# lib64/ etc. to be prepended
 	insinto /etc/"${PN}"/plugins
 	doins "$(cargo_target_dir)"/*.so
+
+	# fix links for readme when inserting doc
+	sed -i 's/\/README\.md/.md/g' README.md
+	dodoc README.md
+	# often plugins have some kind of special
+	# prepended string like :def for dictionary
+	docinto plugins
+	for plug in "${ANYRUN_PLUGINS[@]}"; do
+		newdoc "${S}/plugins/$plug/README.md" "$plug.md"
+	done
 }
 
 pkg_postinst() {

@@ -49,6 +49,8 @@ S="${WORKDIR}/dart-sass"
 #         3. package dart-sass
 #       then we'd have to set up some kind of eselect
 #       and symlink to sass-bin. But nah -- we just dobin sass.
+# 		However, if a non -bin version of dart sass is packaged
+# 			     revdeps will need to be updated to use a virtual package"
 DIR="/opt/${PN}"
 src_install() {
 	exeinto "${DIR}"
@@ -61,9 +63,4 @@ src_install() {
 	doins src/LICENSE src/sass.snapshot
 
 	dosym "${DIR}/sass" "/usr/bin/sass"
-}
-
-pkg_postinst() {
-	elog "If a non -bin version of dart sass is packaged,"
-	elog "revdeps will need to be updated to use a virtual package"
 }

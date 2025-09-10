@@ -5,7 +5,7 @@ EAPI=8
 
 inherit meson
 
-DESCRIPTION="GLib-based library for translating DBusMenu-exported menus into GMenuModels. Used for vala-panel's system tray and all variants of vala-panel-appmenu"
+DESCRIPTION="Global Menu for Vala Panel (and xfce4-panel and mate-panel)"
 HOMEPAGE="https://gitlab.com/vala-panel-project/vala-panel-appmenu"
 SRC_URI="https://gitlab.com/-/project/6865053/uploads/df5899c60d0835ef6593dfd2f709a8e3/${P}.tar.xz"
 S="${WORKDIR}"/${P}

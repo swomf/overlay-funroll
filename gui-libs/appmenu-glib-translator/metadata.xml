@@ -5,6 +5,11 @@
 		<email>swomf@proton.me</email>
 		<name>swomf</name>
 	</maintainer>
+  <longdescription>
+    GLib-based library for translating DBusMenu-exported menus into GMenuModels.
+    Used for vala-panel's system tray and all variants of vala-panel-appmenu.
+    Can be used with GTK3 or GTK4.
+  </longdescription>
 	<upstream>
 		<remote-id type="gitlab">vala-panel-project/vala-panel-appmenu</remote-id>
 	</upstream>

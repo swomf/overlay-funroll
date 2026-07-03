@@ -1,0 +1,85 @@
+diff --git a/lib/hyprland/client.vala b/lib/hyprland/client.vala
+index 3f2d0fb..61de090 100644
+--- a/lib/hyprland/client.vala
++++ b/lib/hyprland/client.vala
+@@ -56,20 +56,19 @@ public class Client : Object {
+     }
+ 
+     public void kill() {
+-        Hyprland.get_default().dispatch("closewindow", @"address:0x$address");
++        Hyprland.get_default().dispatch(@"hl.dsp.window.close({ window = \"address:0x$address\" })");
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focuswindow", @"address:0x$address");
++        Hyprland.get_default().dispatch(@"hl.dsp.focus({ window = \"address:0x$address\" })");
+     }
+ 
+     public void move_to(Workspace ws) {
+-        var id = ws.id;
+-        Hyprland.get_default().dispatch("movetoworkspacesilent", @"$id,address:0x$address");
++        Hyprland.get_default().dispatch(@"hl.dsp.window.move({ workspace = $(ws.id), follow = false, window = \"address:0x$address\" })");
+     }
+ 
+     public void toggle_floating() {
+-        Hyprland.get_default().dispatch("togglefloating", @"address:0x$address");
++        Hyprland.get_default().dispatch(@"hl.dsp.window.float({ window = \"address:0x$address\" })");
+     }
+ }
+ 
+diff --git a/lib/hyprland/hyprland.vala b/lib/hyprland/hyprland.vala
+index 0553d71..f66dd92 100644
+--- a/lib/hyprland/hyprland.vala
++++ b/lib/hyprland/hyprland.vala
+@@ -199,8 +199,8 @@ public class Hyprland : Object {
+         return "";
+     }
+ 
+-    public void dispatch(string dispatcher, string args) {
+-        var msg = "dispatch " + dispatcher + " " + args;
++    public void dispatch(string lua_expr) {
++        var msg = "dispatch " + lua_expr;
+         message_async.begin(msg, (_, res) => {
+             var err = message_async.end(res);
+             if (err != "ok")
+@@ -209,8 +209,7 @@ public class Hyprland : Object {
+     }
+ 
+     public void move_cursor(int x, int y) {
+-        dispatch("movecursor", x.to_string() + " " + y.to_string());
+-
++        dispatch(@"hl.dsp.cursor.move({ x = $x, y = $y })");
+     }
+ 
+     // TODO: nag vaxry to make socket events and hyprctl more consistent
+diff --git a/lib/hyprland/monitor.vala b/lib/hyprland/monitor.vala
+index 6c46142..b152246 100644
+--- a/lib/hyprland/monitor.vala
++++ b/lib/hyprland/monitor.vala
+@@ -66,7 +66,7 @@ public class AstalHyprland.Monitor : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focusmonitor", id.to_string());
++        Hyprland.get_default().dispatch(@"hl.dsp.focus({ monitor = $id })");
+     }
+ 
+     public enum Transform {
+diff --git a/lib/hyprland/workspace.vala b/lib/hyprland/workspace.vala
+index 075f86f..60d5e15 100644
+--- a/lib/hyprland/workspace.vala
++++ b/lib/hyprland/workspace.vala
+@@ -47,11 +47,11 @@ public class Workspace : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("workspace", id.to_string());
++        Hyprland.get_default().dispatch(@"hl.dsp.focus({ workspace = $id })");
+     }
+ 
+     public void move_to(Monitor m) {
+-        Hyprland.get_default().dispatch("moveworkspacetomonitor", id.to_string() + " " + m.id.to_string());
++        Hyprland.get_default().dispatch(@"hl.dsp.workspace.move({ workspace = $id, monitor = $(m.id) })");
+     }
+ }
+ }

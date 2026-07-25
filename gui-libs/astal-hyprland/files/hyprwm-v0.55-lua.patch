@@ -1,0 +1,384 @@
+From e3d1ad817f24ad9e159d22c5aeded764a47d8805 Mon Sep 17 00:00:00 2001
+From: retrozinndev <joaovodias@gmail.com>
+Date: Tue, 12 May 2026 11:41:18 -0300
+Subject: [PATCH 1/4] fix(hyprland): use dispatchers in the new lua format
+
+---
+ lib/hyprland/src/client.vala    |  8 ++++----
+ lib/hyprland/src/hyprland.vala  | 20 ++++++++++++++++++--
+ lib/hyprland/src/monitor.vala   |  2 +-
+ lib/hyprland/src/workspace.vala |  4 ++--
+ 4 files changed, 25 insertions(+), 9 deletions(-)
+
+diff --git a/lib/hyprland/src/client.vala b/lib/hyprland/src/client.vala
+index ac988236d..7f860d101 100644
+--- a/lib/hyprland/src/client.vala
++++ b/lib/hyprland/src/client.vala
+@@ -56,20 +56,20 @@ public class Client : Object {
+     }
+ 
+     public void kill() {
+-        Hyprland.get_default().dispatch("closewindow", @"address:0x$address");
++        Hyprland.get_default().dispatch("window.close", @"address:0x$address");
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focuswindow", @"address:0x$address");
++        Hyprland.get_default().dispatch("focus", @"{window=\"address:0x$address\"}");
+     }
+ 
+     public void move_to(Workspace ws) {
+         var id = ws.id;
+-        Hyprland.get_default().dispatch("movetoworkspacesilent", @"$id,address:0x$address");
++        Hyprland.get_default().dispatch("window.move", @"{window=\"address:0x$address\",workspace=$id,follow=false}");
+     }
+ 
+     public void toggle_floating() {
+-        Hyprland.get_default().dispatch("togglefloating", @"address:0x$address");
++        Hyprland.get_default().dispatch("window.float", @"{window=\"address:0x$address\"}");
+     }
+ }
+ 
+diff --git a/lib/hyprland/src/hyprland.vala b/lib/hyprland/src/hyprland.vala
+index 5f6d6b4c4..bcd9d3357 100644
+--- a/lib/hyprland/src/hyprland.vala
++++ b/lib/hyprland/src/hyprland.vala
+@@ -199,8 +199,24 @@ public class Hyprland : Object {
+         return "";
+     }
+ 
++    /** Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
++      * Please keep in mid that arguments are in the lua syntax, 
++      * you might need to add string quotes when needed
++      */
+     public void dispatch(string dispatcher, string args) {
+-        var msg = "dispatch " + dispatcher + " " + args;
++        var msg = "dispatch hl.dsp." + dispatcher + "(" + args + ")";
++        message_async.begin(msg, (_, res) => {
++                var err = message_async.end(res);
++                if (err != "ok") critical("dispatch error: %s", err);
++            });
++    }
++
++    /** Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
++      * Please keep in mid that arguments are in the lua syntax, 
++      * you might need to add string quotes when needed
++      */
++    public void dispatch_argv(string dispatcher, string[] args) {
++        var msg = "dispatch hl.dsp." + dispatcher + "(" + string.joinv(",", args) + ")";
+         message_async.begin(msg, (_, res) => {
+                 var err = message_async.end(res);
+                 if (err != "ok") critical("dispatch error: %s", err);
+@@ -208,7 +224,7 @@ public class Hyprland : Object {
+     }
+ 
+     public void move_cursor(int x, int y) {
+-        dispatch("movecursor", x.to_string() + " " + y.to_string());
++        dispatch("cursor.move", "{x=" + x.to_string() + ",y=" + y.to_string() + "}");
+     }
+ 
+     // TODO: nag vaxry to make socket events and hyprctl more consistent
+diff --git a/lib/hyprland/src/monitor.vala b/lib/hyprland/src/monitor.vala
+index 29dde36bd..6b4e5eb9f 100644
+--- a/lib/hyprland/src/monitor.vala
++++ b/lib/hyprland/src/monitor.vala
+@@ -67,7 +67,7 @@ public class AstalHyprland.Monitor : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focusmonitor", id.to_string());
++        Hyprland.get_default().dispatch("focus", "{monitor=" + id.to_string() + "}");
+     }
+ 
+     public enum Transform {
+diff --git a/lib/hyprland/src/workspace.vala b/lib/hyprland/src/workspace.vala
+index c4b064d46..8752dede0 100644
+--- a/lib/hyprland/src/workspace.vala
++++ b/lib/hyprland/src/workspace.vala
+@@ -47,11 +47,11 @@ public class Workspace : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("workspace", id.to_string());
++        Hyprland.get_default().dispatch("focus", "{workspace=" + id.to_string() + "}");
+     }
+ 
+     public void move_to(Monitor m) {
+-        Hyprland.get_default().dispatch("moveworkspacetomonitor", id.to_string() + " " + m.id.to_string());
++        Hyprland.get_default().dispatch("workspace.move", "{workspace=" + id.to_string() + ",monitor=" + m.id.to_string() + "}");
+     }
+ }
+ }
+
+From ebe9021d665b680b45ceab5fb2a66514f280c5cb Mon Sep 17 00:00:00 2001
+From: retrozinndev <joaovodias@gmail.com>
+Date: Tue, 12 May 2026 11:44:58 -0300
+Subject: [PATCH 2/4] fix(hyprland): wrong formatting for doc
+
+---
+ lib/hyprland/src/hyprland.vala | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/lib/hyprland/src/hyprland.vala b/lib/hyprland/src/hyprland.vala
+index bcd9d3357..8a6156b8d 100644
+--- a/lib/hyprland/src/hyprland.vala
++++ b/lib/hyprland/src/hyprland.vala
+@@ -199,7 +199,8 @@ public class Hyprland : Object {
+         return "";
+     }
+ 
+-    /** Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
++    /**
++      * Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
+       * Please keep in mid that arguments are in the lua syntax, 
+       * you might need to add string quotes when needed
+       */
+@@ -211,7 +212,8 @@ public class Hyprland : Object {
+             });
+     }
+ 
+-    /** Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
++    /**
++      * Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
+       * Please keep in mid that arguments are in the lua syntax, 
+       * you might need to add string quotes when needed
+       */
+
+From f76f0e5b4c5fd1afa03112eee3765fd2c7e3b012 Mon Sep 17 00:00:00 2001
+From: retrozinndev <joaovodias@gmail.com>
+Date: Tue, 12 May 2026 14:50:14 -0300
+Subject: [PATCH 3/4] fix(hyprland): wrap client dispatcher args in string
+
+I completely forgot, sorry
+---
+ lib/hyprland/src/client.vala | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/hyprland/src/client.vala b/lib/hyprland/src/client.vala
+index 7f860d101..bb6afbd57 100644
+--- a/lib/hyprland/src/client.vala
++++ b/lib/hyprland/src/client.vala
+@@ -56,7 +56,7 @@ public class Client : Object {
+     }
+ 
+     public void kill() {
+-        Hyprland.get_default().dispatch("window.close", @"address:0x$address");
++        Hyprland.get_default().dispatch("window.close", @"\"address:0x$address\"");
+     }
+ 
+     public void focus() {
+@@ -64,7 +64,7 @@ public class Client : Object {
+     }
+ 
+     public void move_to(Workspace ws) {
+-        var id = ws.id;
++        var id = ws.id.to_string();
+         Hyprland.get_default().dispatch("window.move", @"{window=\"address:0x$address\",workspace=$id,follow=false}");
+     }
+ 
+
+From c07dc16ed6c5e3ecc8d941b82a5e4e49d624fe6d Mon Sep 17 00:00:00 2001
+From: retrozinndev <joaovodias@gmail.com>
+Date: Wed, 3 Jun 2026 17:25:49 -0300
+Subject: [PATCH 4/4] fix(hyprland): support both hyprlang and lua dispatchers
+
+for backwards compatibility.
+also added Hyprland:config-provider, which specifies whether the session is using lua or hyprlang for configuration
+---
+ lib/hyprland/src/client.vala    | 28 +++++++++++++++++++++----
+ lib/hyprland/src/hyprland.vala  | 37 +++++++++++++++++++++++++++++----
+ lib/hyprland/src/monitor.vala   |  7 ++++++-
+ lib/hyprland/src/structs.vala   |  5 +++++
+ lib/hyprland/src/workspace.vala | 14 +++++++++++--
+ 5 files changed, 80 insertions(+), 11 deletions(-)
+
+diff --git a/lib/hyprland/src/client.vala b/lib/hyprland/src/client.vala
+index bb6afbd57..ff84548f0 100644
+--- a/lib/hyprland/src/client.vala
++++ b/lib/hyprland/src/client.vala
+@@ -56,20 +56,40 @@ public class Client : Object {
+     }
+ 
+     public void kill() {
+-        Hyprland.get_default().dispatch("window.close", @"\"address:0x$address\"");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("window.close", @"\"address:0x$address\"");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("closewindow", @"address:0x$address");
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focus", @"{window=\"address:0x$address\"}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("focus", @"{window=\"address:0x$address\"}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("focuswindow", @"address:0x$address");
+     }
+ 
+     public void move_to(Workspace ws) {
+         var id = ws.id.to_string();
+-        Hyprland.get_default().dispatch("window.move", @"{window=\"address:0x$address\",workspace=$id,follow=false}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("window.move", @"{window=\"address:0x$address\",workspace=$id,follow=false}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("movetoworkspacesilent", @"$id,address:0x$address"); 
+     }
+ 
+     public void toggle_floating() {
+-        Hyprland.get_default().dispatch("window.float", @"{window=\"address:0x$address\"}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("window.float", @"{window=\"address:0x$address\"}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("togglefloating", @"address:0x$address");
+     }
+ }
+ 
+diff --git a/lib/hyprland/src/hyprland.vala b/lib/hyprland/src/hyprland.vala
+index 8a6156b8d..67ee93997 100644
+--- a/lib/hyprland/src/hyprland.vala
++++ b/lib/hyprland/src/hyprland.vala
+@@ -45,6 +45,7 @@ public class Hyprland : Object {
+     public List<weak Monitor> monitors { owned get { return _monitors.get_values(); } }
+     public List<weak Workspace> workspaces { owned get { return _workspaces.get_values(); } }
+     public List<weak Client> clients { owned get { return _clients.get_values(); } }
++    public ConfigProvider config_provider { get; private set; default = ConfigProvider.HYPRLANG; }
+ 
+     public Monitor get_monitor(int id) {
+         return _monitors.get(id);
+@@ -199,13 +200,29 @@ public class Hyprland : Object {
+         return "";
+     }
+ 
++    /**
++      * Send inline lua to Hyprland. (with `LUA` config provider only)
++      */
++    public void eval(string lua) {
++        var msg = "eval " + lua;
++        message_async.begin(msg, (_, res) => {
++                var err = message_async.end(res);
++                if (err != "ok") critical("eval error: %s", err);
++            });
++    }
++
+     /**
+       * Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
+-      * Please keep in mid that arguments are in the lua syntax, 
++      * Please keep in mind that arguments are in the lua syntax, 
+       * you might need to add string quotes when needed
+       */
+     public void dispatch(string dispatcher, string args) {
+-        var msg = "dispatch hl.dsp." + dispatcher + "(" + args + ")";
++        var msg = "dispatch ";
++        if(this.config_provider == ConfigProvider.LUA) {
++            msg = msg + "hl.dsp." + dispatcher + "(" + args + ")";
++        } else {
++            msg = msg + dispatcher + " " + args;
++        }
+         message_async.begin(msg, (_, res) => {
+                 var err = message_async.end(res);
+                 if (err != "ok") critical("dispatch error: %s", err);
+@@ -214,7 +231,7 @@ public class Hyprland : Object {
+ 
+     /**
+       * Call a dispatcher in the Hyprland socket (without the `hl.dsp` prefix) 
+-      * Please keep in mid that arguments are in the lua syntax, 
++      * Please keep in mind that arguments are in the lua syntax, 
+       * you might need to add string quotes when needed
+       */
+     public void dispatch_argv(string dispatcher, string[] args) {
+@@ -226,7 +243,12 @@ public class Hyprland : Object {
+     }
+ 
+     public void move_cursor(int x, int y) {
+-        dispatch("cursor.move", "{x=" + x.to_string() + ",y=" + y.to_string() + "}");
++        if(this.config_provider == ConfigProvider.LUA) {
++            dispatch("cursor.move", "{x=" + x.to_string() + ",y=" + y.to_string() + "}");
++            return;
++        }
++
++       dispatch("movecursor", x.to_string() + " " + y.to_string()); 
+     }
+ 
+     // TODO: nag vaxry to make socket events and hyprctl more consistent
+@@ -234,6 +256,13 @@ public class Hyprland : Object {
+         var mons = Json.from_string(message("j/monitors")).get_array();
+         var wrkspcs = Json.from_string(message("j/workspaces")).get_array();
+         var clnts = Json.from_string(message("j/clients")).get_array();
++        
++        try {
++            var prov = Json.from_string(message("j/status")).get_object().get_member("configProvider").get_string();
++            if (prov == "lua") {
++                this.config_provider = ConfigProvider.LUA;
++            }
++        } catch (Error _) {}
+ 
+         // create
+         foreach (var mon in mons.get_elements()) {
+diff --git a/lib/hyprland/src/monitor.vala b/lib/hyprland/src/monitor.vala
+index 6b4e5eb9f..c9a718608 100644
+--- a/lib/hyprland/src/monitor.vala
++++ b/lib/hyprland/src/monitor.vala
+@@ -67,7 +67,12 @@ public class AstalHyprland.Monitor : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focus", "{monitor=" + id.to_string() + "}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("focus", "{monitor=" + id.to_string() + "}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("focusmonitor", id.to_string());
+     }
+ 
+     public enum Transform {
+diff --git a/lib/hyprland/src/structs.vala b/lib/hyprland/src/structs.vala
+index c2c945f6b..6e2ee058a 100644
+--- a/lib/hyprland/src/structs.vala
++++ b/lib/hyprland/src/structs.vala
+@@ -45,4 +45,9 @@ public class Position : Object {
+         y = int.parse(xy[1].strip());
+     }
+ }
++
++public enum ConfigProvider {
++    LUA = 0,
++    HYPRLANG = 1
++}
+ }
+diff --git a/lib/hyprland/src/workspace.vala b/lib/hyprland/src/workspace.vala
+index 8752dede0..e0ac12b80 100644
+--- a/lib/hyprland/src/workspace.vala
++++ b/lib/hyprland/src/workspace.vala
+@@ -47,11 +47,21 @@ public class Workspace : Object {
+     }
+ 
+     public void focus() {
+-        Hyprland.get_default().dispatch("focus", "{workspace=" + id.to_string() + "}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("focus", "{workspace=" + id.to_string() + "}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("workspace", id.to_string());
+     }
+ 
+     public void move_to(Monitor m) {
+-        Hyprland.get_default().dispatch("workspace.move", "{workspace=" + id.to_string() + ",monitor=" + m.id.to_string() + "}");
++        if(Hyprland.get_default().config_provider == ConfigProvider.LUA) {
++            Hyprland.get_default().dispatch("workspace.move", "{workspace=" + id.to_string() + ",monitor=" + m.id.to_string() + "}");
++            return;
++        }
++
++        Hyprland.get_default().dispatch("moveworkspacetomonitor", id.to_string() + " " + m.id.to_string());
+     }
+ }
+ }

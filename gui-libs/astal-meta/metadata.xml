@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>swomf@proton.me</email>
+    <name>swomf</name>
+  </maintainer>
+  <use>
+    <flag name="apps">Install the library and command-line tool for querying applications</flag>
+    <flag name="auth">Install the authentication library</flag>
+    <flag name="battery">Install the UPower D-Bus proxy library</flag>
+    <flag name="bluetooth">Install the BlueZ D-Bus wrapper library</flag>
+    <flag name="brightness">Install the display brightness control library</flag>
+    <flag name="cava">Install the audio visualization library</flag>
+    <flag name="gjs">Install the GJS bindings</flag>
+    <flag name="greetd">Install the Greetd IPC client library</flag>
+    <flag name="gtk3">Install the GTK 3 shell library</flag>
+    <flag name="gtk4">Install the GTK 4 shell library</flag>
+    <flag name="hyprland">Install the Hyprland IPC library</flag>
+    <flag name="mpris">Install the MPRIS media player library</flag>
+    <flag name="network">Install the NetworkManager wrapper library</flag>
+    <flag name="notifd">Install the notification daemon library</flag>
+    <flag name="powerprofiles">Install the power profiles library</flag>
+    <flag name="river">Install the River compositor status library</flag>
+    <flag name="tray">Install the system tray library</flag>
+    <flag name="wireplumber">Install the WirePlumber audio library</flag>
+  </use>
+  <upstream>
+    <bugs-to>https://github.com/Aylur/astal/issues</bugs-to>
+    <remote-id type="github">Aylur/astal</remote-id>
+  </upstream>
+</pkgmetadata>

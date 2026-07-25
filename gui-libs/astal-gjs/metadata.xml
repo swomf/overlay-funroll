@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>swomf@proton.me</email>
+    <name>swomf</name>
+  </maintainer>
+  <use>
+    <flag name="gtk3">Install bindings for <pkg>gui-libs/astal-gtk3</pkg></flag>
+    <flag name="gtk4">Install bindings for <pkg>gui-libs/astal-gtk4</pkg></flag>
+  </use>
+  <upstream>
+    <bugs-to>https://github.com/Aylur/astal/issues</bugs-to>
+    <remote-id type="github">Aylur/astal</remote-id>
+  </upstream>
+</pkgmetadata>
